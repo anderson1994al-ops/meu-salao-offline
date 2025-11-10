@@ -107,10 +107,30 @@ const defaultBoletos: Boleto[] = [
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [services, setServices] = useLocalStorage<Service[]>("gestor_salao_services", defaultServices);
   const [clients, setClients] = useLocalStorage<Client[]>("gestor_salao_clients", defaultClients);
-  const [appointments, setAppointments] = useLocalStorage<Appointment[]>("gestor_salao_appointments", []);
+  const [rawAppointments, setRawAppointments] = useLocalStorage<Appointment[]>("gestor_salao_appointments", []);
   const [settings, setSettings] = useLocalStorage<Settings>("gestor_salao_settings", defaultSettings);
   const [boletos, setBoletos] = useLocalStorage<Boleto[]>("gestor_salao_boletos", defaultBoletos);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Convert date strings to Date objects when loading from localStorage
+  const appointments = rawAppointments.map(apt => ({
+    ...apt,
+    date: typeof apt.date === 'string' ? new Date(apt.date) : apt.date
+  }));
+
+  const setAppointments = (value: Appointment[] | ((prev: Appointment[]) => Appointment[])) => {
+    if (typeof value === 'function') {
+      setRawAppointments(prev => {
+        const updated = value(prev.map(apt => ({
+          ...apt,
+          date: typeof apt.date === 'string' ? new Date(apt.date) : apt.date
+        })));
+        return updated;
+      });
+    } else {
+      setRawAppointments(value);
+    }
+  };
 
   const hasPendingBoletos = boletos.some(boleto => boleto.status === "pendente");
 
