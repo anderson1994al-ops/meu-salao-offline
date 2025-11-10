@@ -57,6 +57,13 @@ const Index = () => {
     return hasAppointment ? "agendado" : "disponivel";
   };
 
+  // Verifica se uma data tem agendamentos
+  const hasAppointmentsOnDate = (date: Date) => {
+    return appointments.some(apt => 
+      apt.date.toDateString() === date.toDateString()
+    );
+  };
+
   const handleAddAppointment = () => {
     if (!newAppointment.client || !newAppointment.service || !newAppointment.time) {
       return;
@@ -121,6 +128,12 @@ const Index = () => {
                 onMonthChange={setCurrentMonth}
                 locale={ptBR}
                 className="rounded-md border bg-card w-full"
+                modifiers={{
+                  hasAppointments: (day) => hasAppointmentsOnDate(day)
+                }}
+                modifiersClassNames={{
+                  hasAppointments: "ring-2 ring-yellow-500 ring-inset"
+                }}
                 classNames={{
                   months: "flex w-full",
                   month: "w-full",
@@ -210,6 +223,12 @@ const Index = () => {
                 onMonthChange={setCurrentMonth}
                 locale={ptBR}
                 className="rounded-md border bg-card w-full"
+                modifiers={{
+                  hasAppointments: (day) => hasAppointmentsOnDate(day)
+                }}
+                modifiersClassNames={{
+                  hasAppointments: "ring-2 ring-yellow-500 ring-inset"
+                }}
                 classNames={{
                   months: "flex w-full",
                   month: "w-full",
