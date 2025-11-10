@@ -66,6 +66,8 @@ interface AppDataContextType {
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
 
+export { AppDataContext };
+
 const defaultServices: Service[] = [
   { id: "1", name: "Unhas de Gel", duration: 30, price: 50.0 },
   { id: "2", name: "Pés", duration: 30, price: 40.0 },
