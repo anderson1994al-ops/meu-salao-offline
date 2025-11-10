@@ -57,14 +57,19 @@ const Planos = () => {
       return;
     }
     
-    setBoletos((prev) =>
-      prev.map((boleto) =>
-        boleto.id === boletoId
-          ? { ...boleto, status: boleto.status === "pago" ? "pendente" : "pago" }
-          : boleto
-      )
+    const updatedBoletos = boletos.map((boleto) =>
+      boleto.id === boletoId
+        ? { ...boleto, status: boleto.status === "pago" ? "pendente" : "pago" as "pago" | "pendente" }
+        : boleto
     );
-    toast.success("Status do boleto atualizado!");
+    
+    setBoletos(updatedBoletos);
+    
+    // Check if all boletos are paid
+    const allPaid = updatedBoletos.every(b => b.status === "pago");
+    const statusMessage = allPaid ? "✅ Plano ativado! Todas as funções liberadas." : "Status do boleto atualizado!";
+    
+    toast.success(statusMessage);
   };
 
   return (
