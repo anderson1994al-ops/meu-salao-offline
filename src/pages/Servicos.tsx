@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -14,22 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppData } from "@/contexts/AppDataContext";
-import { useNavigate } from "react-router-dom";
-import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Servicos = () => {
-  const { services, setServices, hasPendingBoletos } = useAppData();
-  const navigate = useNavigate();
+  const { services, setServices } = useAppData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
-
-  useEffect(() => {
-    if (hasPendingBoletos) {
-      setIsBlockedDialogOpen(true);
-    }
-  }, [hasPendingBoletos]);
 
   const handleAddService = () => {
     if (!newService.name || !newService.duration || !newService.price) {
@@ -75,12 +65,6 @@ const Servicos = () => {
       </div>
 
       <FloatingActionButton onClick={() => setIsDialogOpen(true)} />
-
-      <BlockedAccessDialog 
-        open={isBlockedDialogOpen}
-        onOpenChange={setIsBlockedDialogOpen}
-        featureName="Serviços"
-      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

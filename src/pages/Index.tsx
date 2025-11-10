@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -25,28 +25,18 @@ import {
 import { ptBR } from "date-fns/locale";
 import { useAppData } from "@/contexts/AppDataContext";
 import { addMonths, subMonths } from "date-fns";
-import { useNavigate } from "react-router-dom";
-import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Index = () => {
-  const { appointments, setAppointments, services, hasPendingBoletos } = useAppData();
-  const navigate = useNavigate();
+  const { appointments, setAppointments, services } = useAppData();
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("agenda");
   const [newAppointment, setNewAppointment] = useState({
     client: "",
     service: "",
     time: "",
   });
-
-  useEffect(() => {
-    if (hasPendingBoletos) {
-      setIsBlockedDialogOpen(true);
-    }
-  }, [hasPendingBoletos]);
 
   const selectedDateAppointments = appointments.filter(
     (apt) => apt.date.toDateString() === date.toDateString()
@@ -305,12 +295,6 @@ const Index = () => {
       </div>
 
       <FloatingActionButton onClick={() => setIsDialogOpen(true)} />
-
-      <BlockedAccessDialog 
-        open={isBlockedDialogOpen}
-        onOpenChange={setIsBlockedDialogOpen}
-        featureName="Agenda"
-      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
