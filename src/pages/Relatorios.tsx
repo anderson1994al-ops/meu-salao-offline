@@ -3,8 +3,10 @@ import { Card } from "@/components/ui/card";
 import { Users, Calendar, Wrench, DollarSign } from "lucide-react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useAppData } from "@/contexts/AppDataContext";
 
 const Relatorios = () => {
+  const { clients, services, appointments } = useAppData();
   const data = [
     { month: "Junho", value: 0 },
     { month: "Julho", value: 0 },
@@ -14,11 +16,13 @@ const Relatorios = () => {
     { month: "Novembro", value: 0 },
   ];
 
+  const totalFaturamento = appointments.reduce((sum, apt) => sum + apt.price, 0);
+
   const stats = [
-    { label: "Clientes", value: "7", icon: Users },
-    { label: "Agendamentos", value: "0", icon: Calendar },
-    { label: "Serviços", value: "7", icon: Wrench },
-    { label: "Faturamento", value: "R$ 0,00", icon: DollarSign },
+    { label: "Clientes", value: clients.length.toString(), icon: Users },
+    { label: "Agendamentos", value: appointments.length.toString(), icon: Calendar },
+    { label: "Serviços", value: services.length.toString(), icon: Wrench },
+    { label: "Faturamento", value: `R$ ${totalFaturamento.toFixed(2)}`, icon: DollarSign },
   ];
 
   return (

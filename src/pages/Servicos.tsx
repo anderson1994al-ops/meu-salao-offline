@@ -13,36 +13,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-
-interface Service {
-  id: string;
-  name: string;
-  duration: number;
-  price: number;
-}
+import { useAppData } from "@/contexts/AppDataContext";
 
 const Servicos = () => {
-  const [services, setServices] = useState<Service[]>([
-    { id: "1", name: "Unhas de Gel", duration: 30, price: 50.0 },
-    { id: "2", name: "Pés", duration: 30, price: 40.0 },
-    { id: "3", name: "Mãos", duration: 30, price: 35.0 },
-    { id: "4", name: "Unhas de porcelana", duration: 60, price: 80.0 },
-    { id: "5", name: "Francesinha", duration: 45, price: 60.0 },
-    { id: "6", name: "Alongamento de unhas", duration: 90, price: 100.0 },
-    { id: "7", name: "Cabelo", duration: 60, price: 90.0 },
-  ]);
+  const { services, setServices } = useAppData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
 
   const handleAddService = () => {
     if (!newService.name || !newService.duration || !newService.price) {
-      toast.error("Preencha todos os campos");
       return;
     }
 
-    const service: Service = {
+    const service = {
       id: Date.now().toString(),
       name: newService.name,
       duration: parseInt(newService.duration),
@@ -52,7 +36,6 @@ const Servicos = () => {
     setServices([...services, service]);
     setNewService({ name: "", duration: "", price: "" });
     setIsDialogOpen(false);
-    toast.success("Serviço adicionado com sucesso!");
   };
 
   return (

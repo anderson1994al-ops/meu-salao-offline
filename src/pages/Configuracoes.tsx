@@ -11,8 +11,23 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAppData } from "@/contexts/AppDataContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState, useRef } from "react";
 
 const Configuracoes = () => {
+  const { exportData, importData, resetData } = useAppData();
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const menuItems = [
     { label: "Perfil", icon: User, color: "text-primary" },
     { label: "Notificações", icon: Bell, color: "text-primary" },
@@ -25,14 +40,31 @@ const Configuracoes = () => {
 
   const handleMenuClick = (label: string) => {
     if (label === "Reset de Dados") {
-      toast.error("Funcionalidade de reset não implementada");
+      setShowResetDialog(true);
     } else if (label === "Exportar Backup") {
-      toast.success("Backup exportado com sucesso!");
+      exportData();
     } else if (label === "Importar Backup") {
-      toast.info("Selecione um arquivo de backup");
+      fileInputRef.current?.click();
     } else {
       toast.info(`${label} - Em desenvolvimento`);
     }
+  };
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        importData(content);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleResetConfirm = () => {
+    resetData();
+    setShowResetDialog(false);
   };
 
   return (
@@ -55,6 +87,32 @@ const Configuracoes = () => {
           );
         })}
       </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileImport}
+        className="hidden"
+      />
+
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resetar todos os dados?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação irá apagar permanentemente todos os dados do aplicativo,
+              incluindo clientes, serviços e agendamentos. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetConfirm} className="bg-destructive hover:bg-destructive/90">
+              Resetar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

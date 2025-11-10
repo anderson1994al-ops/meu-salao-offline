@@ -13,26 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
-interface Client {
-  id: string;
-  name: string;
-  phone: string;
-  color: string;
-}
+import { useAppData } from "@/contexts/AppDataContext";
 
 const Clientes = () => {
-  const [clients, setClients] = useState<Client[]>([
-    { id: "1", name: "Carol", phone: "(00) 00000-0000", color: "bg-green-500" },
-    { id: "2", name: "Jennifer", phone: "(99) 99999-9999", color: "bg-red-500" },
-    { id: "3", name: "Camila", phone: "(00) 00000-0000", color: "bg-green-500" },
-    { id: "4", name: "Isabella", phone: "(00) 00000-0000", color: "bg-green-500" },
-    { id: "5", name: "Sophia", phone: "(00) 00000-0000", color: "bg-red-500" },
-    { id: "6", name: "Amanda", phone: "(00) 00000-0000", color: "bg-red-500" },
-    { id: "7", name: "Charlotte", phone: "(00) 00000-0000", color: "bg-green-500" },
-  ]);
+  const { clients, setClients } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,22 +29,21 @@ const Clientes = () => {
 
   const handleAddClient = () => {
     if (!newClient.name || !newClient.phone) {
-      toast.error("Preencha todos os campos");
       return;
     }
 
     const colors = ["bg-green-500", "bg-red-500", "bg-blue-500", "bg-purple-500"];
-    const client: Client = {
+    const client = {
       id: Date.now().toString(),
       name: newClient.name,
       phone: newClient.phone,
       color: colors[Math.floor(Math.random() * colors.length)],
+      created_at: new Date().toISOString(),
     };
 
     setClients([...clients, client]);
     setNewClient({ name: "", phone: "" });
     setIsDialogOpen(false);
-    toast.success("Cliente adicionado com sucesso!");
   };
 
   return (

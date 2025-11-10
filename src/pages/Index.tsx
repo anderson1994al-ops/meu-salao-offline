@@ -22,21 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 import { ptBR } from "date-fns/locale";
-
-interface Appointment {
-  id: string;
-  date: Date;
-  time: string;
-  client: string;
-  service: string;
-  price: number;
-}
+import { useAppData } from "@/contexts/AppDataContext";
 
 const Index = () => {
+  const { appointments, setAppointments, services } = useAppData();
   const [date, setDate] = useState<Date>(new Date());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAppointment, setNewAppointment] = useState({
     client: "",
@@ -53,31 +44,24 @@ const Index = () => {
 
   const handleAddAppointment = () => {
     if (!newAppointment.client || !newAppointment.service || !newAppointment.time) {
-      toast.error("Preencha todos os campos");
       return;
     }
 
-    const services = [
-      { name: "Unhas de Gel", price: 50.0 },
-      { name: "Pés", price: 40.0 },
-      { name: "Mãos", price: 35.0 },
-    ];
-
     const selectedService = services.find((s) => s.name === newAppointment.service);
 
-    const appointment: Appointment = {
+    const appointment = {
       id: Date.now().toString(),
       date: date,
       time: newAppointment.time,
       client: newAppointment.client,
       service: newAppointment.service,
       price: selectedService?.price || 0,
+      status: "scheduled" as const,
     };
 
     setAppointments([...appointments, appointment]);
     setNewAppointment({ client: "", service: "", time: "" });
     setIsDialogOpen(false);
-    toast.success("Agendamento criado com sucesso!");
   };
 
   return (
@@ -190,9 +174,11 @@ const Index = () => {
                   <SelectValue placeholder="Selecione o serviço" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Unhas de Gel">Unhas de Gel</SelectItem>
-                  <SelectItem value="Pés">Pés</SelectItem>
-                  <SelectItem value="Mãos">Mãos</SelectItem>
+                  {services.map((service) => (
+                    <SelectItem key={service.id} value={service.name}>
+                      {service.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
