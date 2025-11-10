@@ -23,30 +23,32 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Configuracoes = () => {
+  const navigate = useNavigate();
   const { exportData, importData, resetData } = useAppData();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuItems = [
-    { label: "Perfil", icon: User, color: "text-primary" },
-    { label: "Notificações", icon: Bell, color: "text-primary" },
-    { label: "Planos", icon: CreditCard, color: "text-primary" },
-    { label: "Sobre", icon: Info, color: "text-primary" },
+    { label: "Perfil", icon: User, color: "text-primary", route: "/configuracoes/perfil" },
+    { label: "Notificações", icon: Bell, color: "text-primary", route: "/configuracoes/notificacoes" },
+    { label: "Planos", icon: CreditCard, color: "text-primary", route: "/configuracoes/planos" },
+    { label: "Sobre", icon: Info, color: "text-primary", route: "/configuracoes/sobre" },
     { label: "Exportar Backup", icon: Download, color: "text-primary" },
     { label: "Importar Backup", icon: Upload, color: "text-primary" },
     { label: "Reset de Dados", icon: RotateCcw, color: "text-destructive" },
   ];
 
-  const handleMenuClick = (label: string) => {
-    if (label === "Reset de Dados") {
+  const handleMenuClick = (label: string, route?: string) => {
+    if (route) {
+      navigate(route);
+    } else if (label === "Reset de Dados") {
       setShowResetDialog(true);
     } else if (label === "Exportar Backup") {
       exportData();
     } else if (label === "Importar Backup") {
       fileInputRef.current?.click();
-    } else {
-      toast.info(`${label} - Em desenvolvimento`);
     }
   };
 
@@ -76,7 +78,7 @@ const Configuracoes = () => {
             <Card
               key={index}
               className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors shadow-sm"
-              onClick={() => handleMenuClick(item.label)}
+              onClick={() => handleMenuClick(item.label, item.route)}
             >
               <div className="flex items-center gap-3">
                 <Icon className={`w-5 h-5 ${item.color}`} />

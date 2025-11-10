@@ -33,6 +33,10 @@ export interface Settings {
   theme: "light" | "dark";
   notifications: boolean;
   autoBackup: boolean;
+  notificationsEnabled: boolean;
+  salonName: string;
+  address: string;
+  phone: string;
 }
 
 interface AppDataContextType {
@@ -75,6 +79,10 @@ const defaultSettings: Settings = {
   theme: "light",
   notifications: true,
   autoBackup: false,
+  notificationsEnabled: false,
+  salonName: "",
+  address: "",
+  phone: "",
 };
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
