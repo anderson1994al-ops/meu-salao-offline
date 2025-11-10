@@ -1,28 +1,92 @@
-import { ArrowLeft, Lock, Calendar } from "lucide-react";
+import { ArrowLeft, Lock, Calendar, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const Planos = () => {
   const navigate = useNavigate();
+  
+  const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [countdown, setCountdown] = useState(30);
+  const [boletos, setBoletos] = useState([
+    { id: 1, month: "Dezembro/2025", dueDate: "05/12/2025", amount: 39.90, status: "pago" },
+    { id: 2, month: "Janeiro/2026", dueDate: "05/01/2026", amount: 39.90, status: "pendente" },
+    { id: 3, month: "Fevereiro/2026", dueDate: "05/02/2026", amount: 39.90, status: "pendente" },
+    { id: 4, month: "Março/2026", dueDate: "05/03/2026", amount: 39.90, status: "pendente" },
+    { id: 5, month: "Abril/2026", dueDate: "05/04/2026", amount: 39.90, status: "pendente" },
+  ]);
 
-  const boletos = [
-    { month: "Dezembro/2025", dueDate: "05/12/2025", amount: 39.90, status: "pago" },
-    { month: "Janeiro/2026", dueDate: "05/01/2026", amount: 39.90, status: "pendente" },
-    { month: "Fevereiro/2026", dueDate: "05/02/2026", amount: 39.90, status: "pendente" },
-    { month: "Março/2026", dueDate: "05/03/2026", amount: 39.90, status: "pendente" },
-    { month: "Abril/2026", dueDate: "05/04/2026", amount: 39.90, status: "pendente" },
-  ];
+  const ADMIN_EMAIL = "anderson1994.al@gmail.com";
+  const ADMIN_PASSWORD = "Jr85025620";
+
+  // Countdown timer
+  useEffect(() => {
+    if (isAuthenticated && countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    } else if (isAuthenticated && countdown === 0) {
+      setIsAuthenticated(false);
+      setCountdown(30);
+      toast.info("Sessão administrativa encerrada");
+    }
+  }, [isAuthenticated, countdown]);
+
+  const handleLogin = () => {
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setIsAdminDialogOpen(false);
+      setEmail("");
+      setPassword("");
+      setCountdown(30);
+      toast.success("Login administrativo realizado com sucesso!");
+    } else {
+      toast.error("Email ou senha incorretos");
+    }
+  };
+
+  const toggleBoletoStatus = (boletoId: number) => {
+    if (!isAuthenticated) {
+      setIsAdminDialogOpen(true);
+      return;
+    }
+    
+    setBoletos((prev) =>
+      prev.map((boleto) =>
+        boleto.id === boletoId
+          ? { ...boleto, status: boleto.status === "pago" ? "pendente" : "pago" }
+          : boleto
+      )
+    );
+    toast.success("Status do boleto atualizado!");
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground p-4 flex items-center gap-3">
-        <button onClick={() => navigate("/configuracoes")}>
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <h1 className="text-xl font-semibold">PLANOS</h1>
+      <header className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/configuracoes")}>
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-semibold">PLANOS</h1>
+        </div>
+        {isAuthenticated && (
+          <div className="flex items-center gap-2 bg-primary-foreground/20 px-3 py-1.5 rounded-full">
+            <Clock className="w-4 h-4" />
+            <span className="font-semibold">{countdown}s</span>
+          </div>
+        )}
       </header>
 
       <div className="p-4 space-y-4">
@@ -39,8 +103,8 @@ const Planos = () => {
         <div>
           <h3 className="font-semibold text-foreground mb-3">Boletos Mensais</h3>
           <div className="space-y-3">
-            {boletos.map((boleto, index) => (
-              <Card key={index} className="p-4">
+            {boletos.map((boleto) => (
+              <Card key={boleto.id} className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     {boleto.status === "pago" ? (
@@ -73,7 +137,7 @@ const Planos = () => {
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  disabled={boleto.status === "pago"}
+                  onClick={() => toggleBoletoStatus(boleto.id)}
                 >
                   <Lock className="w-4 h-4 mr-2" />
                   Atualizar Boleto
@@ -83,6 +147,48 @@ const Planos = () => {
           </div>
         </div>
       </div>
+
+      {/* Admin Login Dialog */}
+      <Dialog open={isAdminDialogOpen} onOpenChange={setIsAdminDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Login Administrativo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Digite seu email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Digite sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              />
+            </div>
+            <Button 
+              onClick={handleLogin}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              Entrar
+            </Button>
+            <p className="text-sm text-muted-foreground text-center">
+              Após o login, você terá 30 segundos para atualizar os boletos.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
