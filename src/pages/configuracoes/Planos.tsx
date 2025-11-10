@@ -57,19 +57,23 @@ const Planos = () => {
       return;
     }
     
-    const updatedBoletos = boletos.map((boleto) =>
-      boleto.id === boletoId
-        ? { ...boleto, status: boleto.status === "pago" ? "pendente" : "pago" as "pago" | "pendente" }
-        : boleto
-    );
-    
-    setBoletos(updatedBoletos);
-    
-    // Check if all boletos are paid
-    const allPaid = updatedBoletos.every(b => b.status === "pago");
-    const statusMessage = allPaid ? "✅ Plano ativado! Todas as funções liberadas." : "Status do boleto atualizado!";
-    
-    toast.success(statusMessage);
+    setBoletos((prevBoletos) => {
+      const updatedBoletos = prevBoletos.map((boleto) =>
+        boleto.id === boletoId
+          ? { ...boleto, status: boleto.status === "pago" ? "pendente" : "pago" as "pago" | "pendente" }
+          : boleto
+      );
+      
+      // Check if there are any pending boletos
+      const hasPending = updatedBoletos.some(b => b.status === "pendente");
+      const statusMessage = !hasPending 
+        ? "✅ Plano ativado! Todas as funções liberadas." 
+        : "⚠️ Status atualizado. Ainda há boletos pendentes.";
+      
+      toast.success(statusMessage);
+      
+      return updatedBoletos;
+    });
   };
 
   return (
