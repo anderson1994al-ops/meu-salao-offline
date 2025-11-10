@@ -50,7 +50,7 @@ const BlockedAccessDialog = ({ open, onOpenChange, featureName }: BlockedAccessD
 
           <Button 
             onClick={handleViewPlans}
-            className="w-full bg-primary hover:bg-primary/90"
+            className="w-full"
             size="lg"
           >
             Ver Meus Planos

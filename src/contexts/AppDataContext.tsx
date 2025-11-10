@@ -97,7 +97,7 @@ const defaultSettings: Settings = {
 };
 
 const defaultBoletos: Boleto[] = [
-  { id: 1, month: "Dezembro/2025", dueDate: "05/12/2025", amount: 39.90, status: "pago" },
+  { id: 1, month: "Dezembro/2025", dueDate: "05/12/2025", amount: 39.90, status: "pendente" },
   { id: 2, month: "Janeiro/2026", dueDate: "05/01/2026", amount: 39.90, status: "pendente" },
   { id: 3, month: "Fevereiro/2026", dueDate: "05/02/2026", amount: 39.90, status: "pendente" },
   { id: 4, month: "Março/2026", dueDate: "05/03/2026", amount: 39.90, status: "pendente" },
