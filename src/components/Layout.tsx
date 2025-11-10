@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Wrench, Users, Calendar, BarChart3, Settings } from "lucide-react";
+import { useAppData } from "@/contexts/AppDataContext";
+import { toast } from "sonner";
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,14 +12,23 @@ interface LayoutProps {
 const Layout = ({ children, title }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { hasPendingBoletos } = useAppData();
 
   const navItems = [
-    { path: "/servicos", icon: Wrench, label: "Serviços" },
-    { path: "/clientes", icon: Users, label: "Clientes" },
-    { path: "/", icon: Calendar, label: "Agenda" },
-    { path: "/relatorios", icon: BarChart3, label: "Relatório" },
-    { path: "/configuracoes", icon: Settings, label: "Configurações" },
+    { path: "/servicos", icon: Wrench, label: "Serviços", blocked: true },
+    { path: "/clientes", icon: Users, label: "Clientes", blocked: true },
+    { path: "/", icon: Calendar, label: "Agenda", blocked: true },
+    { path: "/relatorios", icon: BarChart3, label: "Relatório", blocked: true },
+    { path: "/configuracoes", icon: Settings, label: "Configurações", blocked: false },
   ];
+
+  const handleNavClick = (item: typeof navItems[0]) => {
+    if (hasPendingBoletos && item.blocked) {
+      toast.error("Você possui boletos pendentes. Por favor, regularize sua situação em Configurações > Planos.");
+      return;
+    }
+    navigate(item.path);
+  };
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -36,14 +47,18 @@ const Layout = ({ children, title }: LayoutProps) => {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+          const isBlocked = hasPendingBoletos && item.blocked;
           
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavClick(item)}
+              disabled={isBlocked}
               className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors ${
                 isActive
                   ? "text-primary"
+                  : isBlocked
+                  ? "text-muted-foreground/30 cursor-not-allowed"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

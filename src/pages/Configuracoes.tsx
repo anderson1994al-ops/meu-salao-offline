@@ -27,9 +27,10 @@ import { useNavigate } from "react-router-dom";
 
 const Configuracoes = () => {
   const navigate = useNavigate();
-  const { exportData, importData, resetData } = useAppData();
+  const { exportData, importData, resetData, hasPendingBoletos } = useAppData();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const menuItems = [
     { label: "Perfil", icon: User, color: "text-primary", route: "/configuracoes/perfil" },
     { label: "Notificações", icon: Bell, color: "text-primary", route: "/configuracoes/notificacoes" },
@@ -39,6 +40,11 @@ const Configuracoes = () => {
     { label: "Importar Backup", icon: Upload, color: "text-primary" },
     { label: "Reset de Dados", icon: RotateCcw, color: "text-destructive" },
   ];
+
+  // Filter menu items based on payment status
+  const filteredMenuItems = hasPendingBoletos 
+    ? menuItems.filter(item => item.label === "Planos" || item.label === "Sobre")
+    : menuItems;
 
   const handleMenuClick = (label: string, route?: string) => {
     if (route) {
@@ -72,7 +78,7 @@ const Configuracoes = () => {
   return (
     <Layout title="CONFIGURAÇÕES">
       <div className="p-4 space-y-3">
-        {menuItems.map((item, index) => {
+        {filteredMenuItems.map((item, index) => {
           const Icon = item.icon;
           return (
             <Card

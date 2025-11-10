@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { ArrowLeft, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -7,7 +7,13 @@ import { useAppData } from "@/contexts/AppDataContext";
 
 const Notificacoes = () => {
   const navigate = useNavigate();
-  const { settings, setSettings } = useAppData();
+  const { settings, setSettings, hasPendingBoletos } = useAppData();
+
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      navigate("/configuracoes/planos");
+    }
+  }, [hasPendingBoletos, navigate]);
 
   const handleToggle = (checked: boolean) => {
     setSettings({ ...settings, notificationsEnabled: checked });

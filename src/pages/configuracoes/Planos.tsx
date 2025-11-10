@@ -8,22 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useAppData } from "@/contexts/AppDataContext";
 
 const Planos = () => {
   const navigate = useNavigate();
+  const { boletos, setBoletos, hasPendingBoletos } = useAppData();
   
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [countdown, setCountdown] = useState(30);
-  const [boletos, setBoletos] = useState([
-    { id: 1, month: "Dezembro/2025", dueDate: "05/12/2025", amount: 39.90, status: "pago" },
-    { id: 2, month: "Janeiro/2026", dueDate: "05/01/2026", amount: 39.90, status: "pendente" },
-    { id: 3, month: "Fevereiro/2026", dueDate: "05/02/2026", amount: 39.90, status: "pendente" },
-    { id: 4, month: "Março/2026", dueDate: "05/03/2026", amount: 39.90, status: "pendente" },
-    { id: 5, month: "Abril/2026", dueDate: "05/04/2026", amount: 39.90, status: "pendente" },
-  ]);
 
   const ADMIN_EMAIL = "anderson1994.al@gmail.com";
   const ADMIN_PASSWORD = "Jr85025620";
@@ -94,7 +89,9 @@ const Planos = () => {
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-foreground">Plano Profissional</h2>
-            <Badge className="bg-green-500 hover:bg-green-600 text-white">Ativo</Badge>
+            <Badge className={hasPendingBoletos ? "bg-destructive hover:bg-destructive/90 text-white" : "bg-green-500 hover:bg-green-600 text-white"}>
+              {hasPendingBoletos ? "Pendente" : "Ativo"}
+            </Badge>
           </div>
           <p className="text-2xl font-bold text-primary">R$ 39,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
         </Card>

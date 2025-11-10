@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -25,9 +25,11 @@ import {
 import { ptBR } from "date-fns/locale";
 import { useAppData } from "@/contexts/AppDataContext";
 import { addMonths, subMonths } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const { appointments, setAppointments, services } = useAppData();
+  const { appointments, setAppointments, services, hasPendingBoletos } = useAppData();
+  const navigate = useNavigate();
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -37,6 +39,12 @@ const Index = () => {
     service: "",
     time: "",
   });
+
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      navigate("/configuracoes/planos");
+    }
+  }, [hasPendingBoletos, navigate]);
 
   const selectedDateAppointments = appointments.filter(
     (apt) => apt.date.toDateString() === date.toDateString()

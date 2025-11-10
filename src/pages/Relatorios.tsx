@@ -1,12 +1,21 @@
+import { useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Users, Calendar, Wrench, DollarSign } from "lucide-react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useAppData } from "@/contexts/AppDataContext";
+import { useNavigate } from "react-router-dom";
 
 const Relatorios = () => {
-  const { clients, services, appointments } = useAppData();
+  const { clients, services, appointments, hasPendingBoletos } = useAppData();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      navigate("/configuracoes/planos");
+    }
+  }, [hasPendingBoletos, navigate]);
   const data = [
     { month: "Junho", value: 0 },
     { month: "Julho", value: 0 },

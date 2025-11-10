@@ -29,6 +29,14 @@ export interface Appointment {
   notes?: string;
 }
 
+export interface Boleto {
+  id: number;
+  month: string;
+  dueDate: string;
+  amount: number;
+  status: "pago" | "pendente";
+}
+
 export interface Settings {
   theme: "light" | "dark";
   notifications: boolean;
@@ -48,6 +56,9 @@ interface AppDataContextType {
   setAppointments: (appointments: Appointment[] | ((prev: Appointment[]) => Appointment[])) => void;
   settings: Settings;
   setSettings: (settings: Settings | ((prev: Settings) => Settings)) => void;
+  boletos: Boleto[];
+  setBoletos: (boletos: Boleto[] | ((prev: Boleto[]) => Boleto[])) => void;
+  hasPendingBoletos: boolean;
   exportData: () => void;
   importData: (data: string) => void;
   resetData: () => void;
@@ -85,12 +96,23 @@ const defaultSettings: Settings = {
   phone: "",
 };
 
+const defaultBoletos: Boleto[] = [
+  { id: 1, month: "Dezembro/2025", dueDate: "05/12/2025", amount: 39.90, status: "pago" },
+  { id: 2, month: "Janeiro/2026", dueDate: "05/01/2026", amount: 39.90, status: "pendente" },
+  { id: 3, month: "Fevereiro/2026", dueDate: "05/02/2026", amount: 39.90, status: "pendente" },
+  { id: 4, month: "Março/2026", dueDate: "05/03/2026", amount: 39.90, status: "pendente" },
+  { id: 5, month: "Abril/2026", dueDate: "05/04/2026", amount: 39.90, status: "pendente" },
+];
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [services, setServices] = useLocalStorage<Service[]>("gestor_salao_services", defaultServices);
   const [clients, setClients] = useLocalStorage<Client[]>("gestor_salao_clients", defaultClients);
   const [appointments, setAppointments] = useLocalStorage<Appointment[]>("gestor_salao_appointments", []);
   const [settings, setSettings] = useLocalStorage<Settings>("gestor_salao_settings", defaultSettings);
+  const [boletos, setBoletos] = useLocalStorage<Boleto[]>("gestor_salao_boletos", defaultBoletos);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const hasPendingBoletos = boletos.some(boleto => boleto.status === "pendente");
 
   // Auto-save notification (skip on initial load)
   useEffect(() => {
@@ -160,6 +182,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         setAppointments,
         settings,
         setSettings,
+        boletos,
+        setBoletos,
+        hasPendingBoletos,
         exportData,
         importData,
         resetData,

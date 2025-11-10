@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -15,13 +15,21 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAppData } from "@/contexts/AppDataContext";
+import { useNavigate } from "react-router-dom";
 
 const Clientes = () => {
-  const { clients, setClients } = useAppData();
+  const { clients, setClients, hasPendingBoletos } = useAppData();
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", phone: "" });
+
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      navigate("/configuracoes/planos");
+    }
+  }, [hasPendingBoletos, navigate]);
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
