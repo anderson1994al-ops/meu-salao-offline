@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAppData } from "@/contexts/AppDataContext";
+import BottomNavigation from "@/components/BottomNavigation";
 
 const Planos = () => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const Planos = () => {
         )}
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 pb-20">
         {/* Current Plan */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -144,6 +145,8 @@ const Planos = () => {
           </div>
         </div>
       </div>
+
+      <BottomNavigation />
 
       {/* Admin Login Dialog */}
       <Dialog open={isAdminDialogOpen} onOpenChange={setIsAdminDialogOpen}>

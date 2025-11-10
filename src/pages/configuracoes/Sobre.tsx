@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAppData } from "@/contexts/AppDataContext";
+import BottomNavigation from "@/components/BottomNavigation";
 
 const Sobre = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Sobre = () => {
         <h1 className="text-xl font-semibold">SOBRE</h1>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 pb-20">
         {/* Salon Info */}
         <Card className="p-4 space-y-3">
           <div>
@@ -103,6 +104,8 @@ const Sobre = () => {
           </div>
         </Card>
       </div>
+      
+      <BottomNavigation />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useAppData } from "@/contexts/AppDataContext";
 import { toast } from "sonner";
+import BottomNavigation from "@/components/BottomNavigation";
 
 const Perfil = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const Perfil = () => {
         <h1 className="text-xl font-semibold">PERFIL</h1>
       </header>
 
-      <div className="p-4">
+      <div className="p-4 pb-20">
         <Card className="p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="salonName">Nome do Salão</Label>
@@ -77,6 +78,8 @@ const Perfil = () => {
           </Button>
         </Card>
       </div>
+      
+      <BottomNavigation />
     </div>
   );
 };

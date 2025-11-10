@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAppData } from "@/contexts/AppDataContext";
+import BottomNavigation from "@/components/BottomNavigation";
 
 const Notificacoes = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Notificacoes = () => {
         <h1 className="text-xl font-semibold">NOTIFICAÇÕES</h1>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 pb-20">
         <Card className="p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex gap-3 flex-1">
@@ -45,6 +46,8 @@ const Notificacoes = () => {
           Quando ativado, você receberá uma notificação no topo do celular quando chegar o horário de cada atendimento agendado.
         </p>
       </div>
+      
+      <BottomNavigation />
     </div>
   );
 };
