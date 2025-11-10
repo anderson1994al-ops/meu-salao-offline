@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 
@@ -82,19 +82,21 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useLocalStorage<Client[]>("gestor_salao_clients", defaultClients);
   const [appointments, setAppointments] = useLocalStorage<Appointment[]>("gestor_salao_appointments", []);
   const [settings, setSettings] = useLocalStorage<Settings>("gestor_salao_settings", defaultSettings);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Auto-save notification
+  // Auto-save notification (skip on initial load)
   useEffect(() => {
-    const showSaveNotification = () => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
       toast.success("💾 Dados salvos automaticamente", {
         duration: 1000,
         position: "bottom-center",
       });
-    };
-
-    const timeoutId = setTimeout(() => {
-      showSaveNotification();
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timeoutId);
   }, [services, clients, appointments, settings]);
