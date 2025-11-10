@@ -132,7 +132,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const hasPendingBoletos = boletos.some(boleto => boleto.status === "pendente");
+  const hasPendingBoletos = boletos.every(boleto => boleto.status === "pendente");
 
   // Auto-save notification (skip on initial load)
   useEffect(() => {

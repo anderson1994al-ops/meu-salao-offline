@@ -64,11 +64,11 @@ const Planos = () => {
           : boleto
       );
       
-      // Check if there are any pending boletos
-      const hasPending = updatedBoletos.some(b => b.status === "pendente");
-      const statusMessage = !hasPending 
-        ? "✅ Plano ativado! Todas as funções liberadas." 
-        : "⚠️ Status atualizado. Ainda há boletos pendentes.";
+      // Check if all boletos are pending (blocks app only if ALL are pending)
+      const allPending = updatedBoletos.every(b => b.status === "pendente");
+      const statusMessage = !allPending 
+        ? "✅ Plano ativo! App liberado (pelo menos um boleto pago)." 
+        : "⚠️ Plano pendente! Pague pelo menos um boleto para liberar o app.";
       
       toast.success(statusMessage);
       
