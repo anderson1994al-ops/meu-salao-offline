@@ -15,19 +15,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppData } from "@/contexts/AppDataContext";
 import { useNavigate } from "react-router-dom";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Servicos = () => {
   const { services, setServices, hasPendingBoletos } = useAppData();
   const navigate = useNavigate();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
 
   useEffect(() => {
     if (hasPendingBoletos) {
-      navigate("/configuracoes/planos");
+      setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos, navigate]);
+  }, [hasPendingBoletos]);
 
   const handleAddService = () => {
     if (!newService.name || !newService.duration || !newService.price) {
@@ -73,6 +75,12 @@ const Servicos = () => {
       </div>
 
       <FloatingActionButton onClick={() => setIsDialogOpen(true)} />
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Serviços"
+      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

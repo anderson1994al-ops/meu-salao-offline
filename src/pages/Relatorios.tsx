@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Users, Calendar, Wrench, DollarSign } from "lucide-react";
@@ -6,16 +6,18 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } fro
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useAppData } from "@/contexts/AppDataContext";
 import { useNavigate } from "react-router-dom";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Relatorios = () => {
   const { clients, services, appointments, hasPendingBoletos } = useAppData();
   const navigate = useNavigate();
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
 
   useEffect(() => {
     if (hasPendingBoletos) {
-      navigate("/configuracoes/planos");
+      setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos, navigate]);
+  }, [hasPendingBoletos]);
   const data = [
     { month: "Junho", value: 0 },
     { month: "Julho", value: 0 },
@@ -89,6 +91,12 @@ const Relatorios = () => {
           </ChartContainer>
         </Card>
       </div>
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Relatório"
+      />
     </Layout>
   );
 };

@@ -26,6 +26,7 @@ import { ptBR } from "date-fns/locale";
 import { useAppData } from "@/contexts/AppDataContext";
 import { addMonths, subMonths } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Index = () => {
   const { appointments, setAppointments, services, hasPendingBoletos } = useAppData();
@@ -33,6 +34,7 @@ const Index = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("agenda");
   const [newAppointment, setNewAppointment] = useState({
     client: "",
@@ -42,9 +44,9 @@ const Index = () => {
 
   useEffect(() => {
     if (hasPendingBoletos) {
-      navigate("/configuracoes/planos");
+      setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos, navigate]);
+  }, [hasPendingBoletos]);
 
   const selectedDateAppointments = appointments.filter(
     (apt) => apt.date.toDateString() === date.toDateString()
@@ -303,6 +305,12 @@ const Index = () => {
       </div>
 
       <FloatingActionButton onClick={() => setIsDialogOpen(true)} />
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Agenda"
+      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

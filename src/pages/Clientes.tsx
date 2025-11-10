@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAppData } from "@/contexts/AppDataContext";
 import { useNavigate } from "react-router-dom";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Clientes = () => {
   const { clients, setClients, hasPendingBoletos } = useAppData();
@@ -23,13 +24,14 @@ const Clientes = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", phone: "" });
 
   useEffect(() => {
     if (hasPendingBoletos) {
-      navigate("/configuracoes/planos");
+      setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos, navigate]);
+  }, [hasPendingBoletos]);
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -93,6 +95,12 @@ const Clientes = () => {
       </div>
 
       <FloatingActionButton onClick={() => setIsDialogOpen(true)} />
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Clientes"
+      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
