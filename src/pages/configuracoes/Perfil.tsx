@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -10,18 +10,12 @@ import { toast } from "sonner";
 
 const Perfil = () => {
   const navigate = useNavigate();
-  const { settings, setSettings, hasPendingBoletos } = useAppData();
+  const { settings, setSettings } = useAppData();
   const [formData, setFormData] = useState({
     salonName: settings.salonName || "",
     address: settings.address || "",
     phone: settings.phone || "",
   });
-
-  useEffect(() => {
-    if (hasPendingBoletos) {
-      navigate("/configuracoes/planos");
-    }
-  }, [hasPendingBoletos, navigate]);
 
   const handleSave = () => {
     setSettings({
