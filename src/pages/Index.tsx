@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Trash2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -27,11 +27,12 @@ import { useAppData } from "@/contexts/AppDataContext";
 import { addMonths, subMonths } from "date-fns";
 
 const Index = () => {
-  const { appointments, setAppointments, services } = useAppData();
+  const { appointments, setAppointments, services, settings } = useAppData();
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("agenda");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newAppointment, setNewAppointment] = useState({
     client: "",
     service: "",
@@ -71,19 +72,72 @@ const Index = () => {
 
     const selectedService = services.find((s) => s.name === newAppointment.service);
 
-    const appointment = {
-      id: Date.now().toString(),
-      date: date,
-      time: newAppointment.time,
-      client: newAppointment.client,
-      service: newAppointment.service,
-      price: selectedService?.price || 0,
-      status: "scheduled" as const,
-    };
-
-    setAppointments([...appointments, appointment]);
+    if (editingId) {
+      // Editando agendamento existente
+      setAppointments(appointments.map(apt => 
+        apt.id === editingId 
+          ? {
+              ...apt,
+              client: newAppointment.client,
+              service: newAppointment.service,
+              time: newAppointment.time,
+              price: selectedService?.price || 0,
+            }
+          : apt
+      ));
+      setEditingId(null);
+    } else {
+      // Criando novo agendamento
+      const appointment = {
+        id: Date.now().toString(),
+        date: date,
+        time: newAppointment.time,
+        client: newAppointment.client,
+        service: newAppointment.service,
+        price: selectedService?.price || 0,
+        status: "scheduled" as const,
+      };
+      setAppointments([...appointments, appointment]);
+    }
+    
     setNewAppointment({ client: "", service: "", time: "" });
     setIsDialogOpen(false);
+  };
+
+  const handleEditAppointment = (appointment: any) => {
+    setEditingId(appointment.id);
+    setNewAppointment({
+      client: appointment.client,
+      service: appointment.service,
+      time: appointment.time,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteAppointment = (id: string) => {
+    setAppointments(appointments.filter(apt => apt.id !== id));
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!newAppointment.client || !newAppointment.service || !newAppointment.time) {
+      return;
+    }
+
+    const salonName = settings.salonName || "Nosso Salão";
+    const formattedDate = date.toLocaleDateString("pt-BR");
+    
+    const message = `💗✨ Agendamento Confirmado ✨💗
+
+💋 Salão: ${salonName}
+👸 Cliente: ${newAppointment.client}
+💆‍♀️ Serviço: ${newAppointment.service}
+📅 Data: ${formattedDate}
+🕒 Hora: ${newAppointment.time}
+
+Obrigada! Te Aguardamos Ansiosamente! 🌸💄`;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -175,15 +229,33 @@ const Index = () => {
                   {selectedDateAppointments.map((apt) => (
                     <div
                       key={apt.id}
-                      className="flex justify-between items-center p-3 bg-muted/50 rounded-lg"
+                      className="flex justify-between items-center gap-2 p-3 bg-muted/50 rounded-lg"
                     >
-                      <div>
+                      <div className="flex-1">
                         <p className="font-semibold text-foreground">{apt.client}</p>
                         <p className="text-sm text-muted-foreground">
                           {apt.service} - {apt.time}
                         </p>
                       </div>
                       <p className="font-bold text-primary">R$ {apt.price.toFixed(2)}</p>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleEditAppointment(apt)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => handleDeleteAppointment(apt.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -296,10 +368,16 @@ const Index = () => {
 
       <FloatingActionButton onClick={() => setIsDialogOpen(true)} />
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          setEditingId(null);
+          setNewAppointment({ client: "", service: "", time: "" });
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Novo Agendamento</DialogTitle>
+            <DialogTitle>{editingId ? "Editar Agendamento" : "Novo Agendamento"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -345,12 +423,25 @@ const Index = () => {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => {
+              setIsDialogOpen(false);
+              setEditingId(null);
+              setNewAppointment({ client: "", service: "", time: "" });
+            }}>
               Cancelar
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleSendWhatsApp}
+              disabled={!newAppointment.client || !newAppointment.service || !newAppointment.time}
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              Enviar WhatsApp
+            </Button>
             <Button onClick={handleAddAppointment} className="bg-primary hover:bg-primary/90">
-              Salvar
+              {editingId ? "Atualizar" : "Salvar"}
             </Button>
           </DialogFooter>
         </DialogContent>
