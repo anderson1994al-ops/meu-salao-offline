@@ -1,3 +1,4 @@
+import React from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Users, Calendar, Wrench, DollarSign } from "lucide-react";
@@ -7,14 +8,35 @@ import { useAppData } from "@/contexts/AppDataContext";
 
 const Relatorios = () => {
   const { clients, services, appointments } = useAppData();
-  const data = [
-    { month: "Junho", value: 0 },
-    { month: "Julho", value: 0 },
-    { month: "Agosto", value: 0 },
-    { month: "Setembro", value: 0 },
-    { month: "Outubro", value: 0 },
-    { month: "Novembro", value: 0 },
-  ];
+  
+  // Calcula faturamento por mês dinamicamente
+  const monthlyData = React.useMemo(() => {
+    const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+                    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const currentMonth = new Date().getMonth();
+    const last6Months = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const monthIndex = (currentMonth - i + 12) % 12;
+      last6Months.push({
+        month: months[monthIndex],
+        value: 0,
+        monthIndex: monthIndex
+      });
+    }
+    
+    // Agrupa appointments por mês e soma o faturamento
+    appointments.forEach(apt => {
+      const aptDate = new Date(apt.date);
+      const aptMonth = aptDate.getMonth();
+      const monthData = last6Months.find(m => m.monthIndex === aptMonth);
+      if (monthData) {
+        monthData.value += apt.price;
+      }
+    });
+    
+    return last6Months;
+  }, [appointments]);
 
   const totalFaturamento = appointments.reduce((sum, apt) => sum + apt.price, 0);
 
@@ -57,7 +79,7 @@ const Relatorios = () => {
             className="h-64"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data}>
+              <LineChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis
                   dataKey="month"
@@ -65,7 +87,7 @@ const Relatorios = () => {
                 />
                 <YAxis
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  domain={[0, 4]}
+                  domain={[0, 'auto']}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
