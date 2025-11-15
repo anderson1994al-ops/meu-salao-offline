@@ -11,8 +11,8 @@ const Relatorios = () => {
   
   // Calcula faturamento por mês dinamicamente
   const monthlyData = React.useMemo(() => {
-    const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
-                    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", 
+                    "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     const currentMonth = new Date().getMonth();
     const last6Months = [];
     
@@ -67,8 +67,8 @@ const Relatorios = () => {
         </div>
 
         {/* Chart */}
-        <Card className="p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Faturamento Mensal</h3>
+        <Card className="p-3 sm:p-4 shadow-sm">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Faturamento Mensal</h3>
           <ChartContainer
             config={{
               value: {
@@ -76,26 +76,34 @@ const Relatorios = () => {
                 color: "hsl(var(--primary))",
               },
             }}
-            className="h-64"
+            className="h-56 sm:h-64 md:h-72"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData}>
+              <LineChart data={monthlyData} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis
                   dataKey="month"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tickMargin={8}
                 />
                 <YAxis
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                   domain={[0, 'auto']}
+                  tickFormatter={(value) => `R$${value}`}
+                  width={60}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip 
+                  content={<ChartTooltipContent 
+                    formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, "Faturamento"]}
+                  />} 
+                />
                 <Line
                   type="monotone"
                   dataKey="value"
                   stroke="hsl(var(--primary))"
                   strokeWidth={2}
-                  dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                  dot={{ fill: "hsl(var(--primary))", r: 3 }}
+                  activeDot={{ r: 5 }}
                 />
               </LineChart>
             </ResponsiveContainer>
