@@ -9,6 +9,7 @@ import {
   Upload,
   RotateCcw,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppData } from "@/contexts/AppDataContext";
@@ -39,6 +40,7 @@ const Configuracoes = () => {
     { label: "Exportar Backup", icon: Download, color: "text-primary" },
     { label: "Importar Backup", icon: Upload, color: "text-primary" },
     { label: "Reset de Dados", icon: RotateCcw, color: "text-destructive" },
+    { label: "Sair da Conta", icon: LogOut, color: "text-destructive" },
   ];
 
   // Filter menu items based on payment status
@@ -55,6 +57,8 @@ const Configuracoes = () => {
       exportData();
     } else if (label === "Importar Backup") {
       fileInputRef.current?.click();
+    } else if (label === "Sair da Conta") {
+      navigate("/login");
     }
   };
 
