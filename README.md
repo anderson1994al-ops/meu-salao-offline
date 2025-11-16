@@ -1,4 +1,39 @@
-# Welcome to your Lovable project
+# 📱 Meu Salão Offline - Aplicativo Android
+
+Sistema de gestão para salões de beleza com suporte para aplicativo Android nativo.
+
+## 🚀 Gerar APK Android
+
+**[→ Clique aqui para ver o guia completo de geração do APK](./ANDROID_BUILD.md)**
+
+### Resumo Rápido:
+
+```bash
+# 1. Clone o projeto
+git clone <YOUR_GIT_URL>
+cd meu-salao-offline
+
+# 2. Instale dependências
+npm install
+
+# 3. Adicione Android
+npx cap add android
+
+# 4. Build da aplicação
+npm run build
+
+# 5. Sincronize
+npx cap sync android
+
+# 6. Abra no Android Studio
+npx cap open android
+
+# 7. No Android Studio: Build > Build APK(s)
+```
+
+O APK estará em: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+---
 
 ## Project info
 
@@ -54,11 +89,10 @@ npm run dev
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: React + TypeScript + Vite
+- **UI**: shadcn-ui + Tailwind CSS
+- **Mobile**: Capacitor (Android nativo)
+- **Storage**: LocalStorage (offline-first)
 
 ## How can I deploy this project?
 
