@@ -29,16 +29,7 @@ import { addMonths, subMonths } from "date-fns";
 import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Index = () => {
-  const navigate = useNavigate();
   const { appointments, setAppointments, services, settings, hasPendingBoletos, isExpired } = useAppData();
-
-  // Verifica autenticação
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
-  }, [navigate]);
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
