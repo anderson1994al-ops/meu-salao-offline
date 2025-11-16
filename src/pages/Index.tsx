@@ -27,8 +27,10 @@ import { ptBR } from "date-fns/locale";
 import { useAppData } from "@/contexts/AppDataContext";
 import { addMonths, subMonths } from "date-fns";
 import BlockedAccessDialog from "@/components/BlockedAccessDialog";
+import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Index = () => {
+  useExpirationAlert();
   const { appointments, setAppointments, services, settings, hasPendingBoletos, isExpired } = useAppData();
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -42,12 +44,12 @@ const Index = () => {
     time: "",
   });
 
-  // Show blocked dialog on mount if pending boletos
+  // Show blocked dialog on mount if expired or pending boletos
   useEffect(() => {
-    if (hasPendingBoletos) {
+    if (isExpired || hasPendingBoletos) {
       setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos]);
 
   const selectedDateAppointments = appointments.filter(
     (apt) => apt.date.toDateString() === date.toDateString()
