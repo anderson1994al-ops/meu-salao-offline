@@ -7,7 +7,7 @@ import BlockedAccessDialog from "./BlockedAccessDialog";
 const BottomNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasPendingBoletos, isExpired } = useAppData();
+  const { hasPendingBoletos, isExpired, isTrialPeriod } = useAppData();
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState("");
 
@@ -20,7 +20,7 @@ const BottomNavigation = () => {
   ];
 
   const handleNavClick = (item: typeof navItems[0]) => {
-    if (hasPendingBoletos && item.blocked) {
+    if ((isExpired || hasPendingBoletos) && !isTrialPeriod && item.blocked) {
       setBlockedFeatureName(item.label);
       setIsBlockedDialogOpen(true);
       return;

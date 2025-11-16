@@ -10,15 +10,15 @@ import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Relatorios = () => {
   useExpirationAlert();
-  const { clients, services, appointments, hasPendingBoletos, isExpired } = useAppData();
+  const { clients, services, appointments, hasPendingBoletos, isExpired, isTrialPeriod } = useAppData();
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
 
-  // Show blocked dialog on mount if expired or pending boletos
+  // Show blocked dialog on mount if expired or pending boletos (but not during trial period)
   useEffect(() => {
-    if (isExpired || hasPendingBoletos) {
+    if ((isExpired || hasPendingBoletos) && !isTrialPeriod) {
       setIsBlockedDialogOpen(true);
     }
-  }, [isExpired, hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos, isTrialPeriod]);
   
   // Calcula faturamento por mês dinamicamente
   const monthlyData = React.useMemo(() => {

@@ -31,7 +31,7 @@ import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Index = () => {
   useExpirationAlert();
-  const { appointments, setAppointments, services, settings, hasPendingBoletos, isExpired } = useAppData();
+  const { appointments, setAppointments, services, settings, hasPendingBoletos, isExpired, isTrialPeriod } = useAppData();
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,12 +44,12 @@ const Index = () => {
     time: "",
   });
 
-  // Show blocked dialog on mount if expired or pending boletos
+  // Show blocked dialog on mount if expired or pending boletos (but not during trial period)
   useEffect(() => {
-    if (isExpired || hasPendingBoletos) {
+    if ((isExpired || hasPendingBoletos) && !isTrialPeriod) {
       setIsBlockedDialogOpen(true);
     }
-  }, [isExpired, hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos, isTrialPeriod]);
 
   const selectedDateAppointments = appointments.filter(
     (apt) => apt.date.toDateString() === date.toDateString()

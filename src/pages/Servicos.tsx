@@ -19,18 +19,18 @@ import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Servicos = () => {
   useExpirationAlert();
-  const { services, setServices, hasPendingBoletos, isExpired } = useAppData();
+  const { services, setServices, hasPendingBoletos, isExpired, isTrialPeriod } = useAppData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
 
-  // Show blocked dialog on mount if expired or pending boletos
+  // Show blocked dialog on mount if expired or pending boletos (but not during trial period)
   useEffect(() => {
-    if (isExpired || hasPendingBoletos) {
+    if ((isExpired || hasPendingBoletos) && !isTrialPeriod) {
       setIsBlockedDialogOpen(true);
     }
-  }, [isExpired, hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos, isTrialPeriod]);
 
   const handleAddService = () => {
     if (!newService.name || !newService.duration || !newService.price) {
