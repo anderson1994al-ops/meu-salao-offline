@@ -62,6 +62,7 @@ interface AppDataContextType {
   hasPendingBoletos: boolean;
   daysRemaining: number | null;
   isExpired: boolean;
+  isTrialPeriod: boolean;
   exportData: () => void;
   importData: (data: string) => void;
   resetData: () => void;
@@ -175,19 +176,43 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Calculate days remaining and expiration status
+  // Calculate days remaining and expiration status with 7-day trial
   const calculatePlanStatus = () => {
     const paidBoletos = boletos.filter(b => b.status === "pago" && b.paymentDate);
+    const regDate = new Date(registrationDate);
+    const today = new Date();
     
-    console.log("Total boletos:", boletos.length);
-    console.log("Boletos pagos com data:", paidBoletos);
+    // Calculate trial period (7 days from registration)
+    const trialEndDate = new Date(regDate);
+    trialEndDate.setDate(trialEndDate.getDate() + 7);
+    const trialDiffTime = trialEndDate.getTime() - today.getTime();
+    const trialDaysRemaining = Math.ceil(trialDiffTime / (1000 * 60 * 60 * 24));
+    const isInTrialPeriod = trialDaysRemaining > 0;
     
-    if (paidBoletos.length === 0) {
-      console.log("Nenhum boleto pago encontrado");
-      return { daysRemaining: null, isExpired: false };
+    console.log("Data de registro:", regDate);
+    console.log("Fim do período de teste:", trialEndDate);
+    console.log("Dias restantes do teste:", trialDaysRemaining);
+    console.log("Está no período de teste:", isInTrialPeriod);
+    
+    // If still in trial period and no payments made
+    if (isInTrialPeriod && paidBoletos.length === 0) {
+      return { 
+        daysRemaining: trialDaysRemaining, 
+        isExpired: false,
+        isTrialPeriod: true
+      };
+    }
+    
+    // If trial ended and no payments made
+    if (!isInTrialPeriod && paidBoletos.length === 0) {
+      return { 
+        daysRemaining: 0, 
+        isExpired: true,
+        isTrialPeriod: false
+      };
     }
 
-    // Get the most recent paid boleto
+    // If there are paid boletos, calculate based on most recent payment
     const mostRecentPaid = paidBoletos.reduce((latest, current) => {
       const latestDate = new Date(latest.paymentDate!);
       const currentDate = new Date(current.paymentDate!);
@@ -200,7 +225,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const renewalDate = new Date(paymentDate);
     renewalDate.setDate(renewalDate.getDate() + 30);
     
-    const today = new Date();
     const diffTime = renewalDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
@@ -210,11 +234,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     
     return {
       daysRemaining: diffDays > 0 ? diffDays : 0,
-      isExpired: diffDays <= 0
+      isExpired: diffDays <= 0,
+      isTrialPeriod: false
     };
   };
 
-  const { daysRemaining, isExpired } = calculatePlanStatus();
+  const { daysRemaining, isExpired, isTrialPeriod } = calculatePlanStatus();
 
   // Check if app should be blocked: all boletos pending OR plan expired
   const hasPendingBoletos = boletos.every(boleto => boleto.status === "pendente") || isExpired;
@@ -292,6 +317,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         hasPendingBoletos,
         daysRemaining,
         isExpired,
+        isTrialPeriod,
         exportData,
         importData,
         resetData,
