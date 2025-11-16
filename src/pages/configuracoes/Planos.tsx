@@ -1,4 +1,4 @@
-import { ArrowLeft, Lock, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Lock, Calendar, Clock, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,48 @@ const Planos = () => {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [countdown, setCountdown] = useState(30);
+  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
+  const [renewalDate, setRenewalDate] = useState<string>("");
+  const [showRenewalAlert, setShowRenewalAlert] = useState(false);
 
   const ADMIN_EMAIL = "anderson1994.al@gmail.com";
   const ADMIN_PASSWORD = "Jr85025620";
+
+  // Calculate days remaining for renewal
+  useEffect(() => {
+    const paidBoletos = boletos.filter(b => b.status === "pago" && b.paymentDate);
+    
+    if (paidBoletos.length > 0) {
+      // Get the most recent paid boleto
+      const mostRecentPaid = paidBoletos.reduce((latest, current) => {
+        const latestDate = new Date(latest.paymentDate!);
+        const currentDate = new Date(current.paymentDate!);
+        return currentDate > latestDate ? current : latest;
+      });
+
+      const paymentDate = new Date(mostRecentPaid.paymentDate!);
+      const renewalDate = new Date(paymentDate);
+      renewalDate.setDate(renewalDate.getDate() + 30);
+      
+      const today = new Date();
+      const diffTime = renewalDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      setDaysRemaining(diffDays > 0 ? diffDays : 0);
+      setRenewalDate(renewalDate.toLocaleDateString('pt-BR'));
+      
+      // Show alert if 2 days or less remaining
+      if (diffDays <= 2 && diffDays > 0 && !showRenewalAlert) {
+        setShowRenewalAlert(true);
+        toast.warning(
+          `Sua mensalidade vencerá dia ${renewalDate.toLocaleDateString('pt-BR')}. Não fique sem os recursos dos planos premium do nosso app!`,
+          { duration: 10000 }
+        );
+      }
+    } else {
+      setDaysRemaining(null);
+    }
+  }, [boletos]);
 
   // Countdown timer
   useEffect(() => {
@@ -58,11 +97,17 @@ const Planos = () => {
     }
     
     setBoletos((prevBoletos) => {
-      const updatedBoletos = prevBoletos.map((boleto) =>
-        boleto.id === boletoId
-          ? { ...boleto, status: boleto.status === "pago" ? "pendente" : "pago" as "pago" | "pendente" }
-          : boleto
-      );
+      const updatedBoletos = prevBoletos.map((boleto) => {
+        if (boleto.id === boletoId) {
+          const newStatus = boleto.status === "pago" ? "pendente" : "pago";
+          return {
+            ...boleto,
+            status: newStatus as "pago" | "pendente",
+            paymentDate: newStatus === "pago" ? new Date().toISOString() : undefined
+          };
+        }
+        return boleto;
+      });
       
       // Check if all boletos are pending (blocks app only if ALL are pending)
       const allPending = updatedBoletos.every(b => b.status === "pendente");
@@ -84,7 +129,19 @@ const Planos = () => {
           <button onClick={() => navigate("/configuracoes")}>
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold">PLANOS</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-semibold">PLANOS</h1>
+            {daysRemaining !== null && (
+              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                daysRemaining <= 2 
+                  ? 'bg-destructive/20 text-destructive' 
+                  : 'bg-primary-foreground/20'
+              }`}>
+                <Calendar className="w-4 h-4" />
+                <span>{daysRemaining} dias</span>
+              </div>
+            )}
+          </div>
         </div>
         {isAuthenticated && (
           <div className="flex items-center gap-2 bg-primary-foreground/20 px-3 py-1.5 rounded-full">
@@ -95,6 +152,21 @@ const Planos = () => {
       </header>
 
       <div className="p-4 space-y-4 pb-20">
+        {/* Renewal Alert */}
+        {daysRemaining !== null && daysRemaining <= 2 && (
+          <Card className="p-4 bg-destructive/10 border-destructive">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-destructive mb-1">Renovação Próxima</h3>
+                <p className="text-sm text-foreground">
+                  Sua mensalidade vencerá dia {renewalDate}. Não fique sem os recursos dos planos premium do nosso app!
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Current Plan */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -104,6 +176,11 @@ const Planos = () => {
             </Badge>
           </div>
           <p className="text-2xl font-bold text-primary">R$ 39,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
+          {daysRemaining !== null && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Renovação em {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'} ({renewalDate})
+            </p>
+          )}
         </Card>
 
         {/* Monthly Tickets */}
