@@ -20,19 +20,19 @@ import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Clientes = () => {
   useExpirationAlert();
-  const { clients, setClients, hasPendingBoletos, isExpired } = useAppData();
+  const { clients, setClients, hasPendingBoletos, isExpired, isTrialPeriod } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", phone: "" });
 
-  // Show blocked dialog on mount if expired or pending boletos
+  // Show blocked dialog on mount if expired or pending boletos (but not during trial period)
   useEffect(() => {
-    if (isExpired || hasPendingBoletos) {
+    if ((isExpired || hasPendingBoletos) && !isTrialPeriod) {
       setIsBlockedDialogOpen(true);
     }
-  }, [isExpired, hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos, isTrialPeriod]);
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
