@@ -9,6 +9,23 @@ import { Scissors, Lock, Mail, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import loginHero from "@/assets/login-hero.png";
 import { toast } from "sonner";
+import { z } from "zod";
+
+// Validation schemas
+const loginSchema = z.object({
+  email: z.string().trim().email({ message: "E-mail inválido" }).max(255, { message: "E-mail muito longo" }),
+  senha: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }).max(128, { message: "Senha muito longa" })
+});
+
+const signUpSchema = z.object({
+  nome: z.string().trim().min(1, { message: "Nome é obrigatório" }).max(100, { message: "Nome muito longo" }),
+  email: z.string().trim().email({ message: "E-mail inválido" }).max(255, { message: "E-mail muito longo" }),
+  senha: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }).max(128, { message: "Senha muito longa" }),
+  confirmarSenha: z.string()
+}).refine(data => data.senha === data.confirmarSenha, {
+  message: "As senhas não coincidem",
+  path: ["confirmarSenha"]
+});
 
 const Login = () => {
   const navigate = useNavigate();
@@ -30,9 +47,14 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !senha) {
-      toast.error("Por favor, preencha todos os campos");
-      return;
+    // Validate input
+    try {
+      loginSchema.parse({ email, senha });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -48,19 +70,14 @@ const Login = () => {
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!nome || !email || !senha || !confirmarSenha) {
-      toast.error("Por favor, preencha todos os campos");
-      return;
-    }
-
-    if (senha !== confirmarSenha) {
-      toast.error("As senhas não coincidem");
-      return;
-    }
-
-    if (senha.length < 6) {
-      toast.error("A senha deve ter pelo menos 6 caracteres");
-      return;
+    // Validate input
+    try {
+      signUpSchema.parse({ nome, email, senha, confirmarSenha });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     setIsLoading(true);
