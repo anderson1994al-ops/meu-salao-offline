@@ -13,9 +13,10 @@ interface BlockedAccessDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   featureName: string;
+  isExpired?: boolean;
 }
 
-const BlockedAccessDialog = ({ open, onOpenChange, featureName }: BlockedAccessDialogProps) => {
+const BlockedAccessDialog = ({ open, onOpenChange, featureName, isExpired = false }: BlockedAccessDialogProps) => {
   const navigate = useNavigate();
 
   const handleViewPlans = () => {
@@ -43,8 +44,13 @@ const BlockedAccessDialog = ({ open, onOpenChange, featureName }: BlockedAccessD
           <Alert className="bg-orange-50 border-orange-200">
             <CreditCard className="h-4 w-4 text-orange-600" />
             <AlertDescription className="text-orange-800 ml-2">
-              <strong className="block mb-1">Plano Profissional Pendente</strong>
-              Efetue o pagamento de pelo menos um boleto mensal para ativar todas as funcionalidades do sistema.
+              <strong className="block mb-1">
+                {isExpired ? 'Plano Expirado!' : 'Plano Profissional Pendente'}
+              </strong>
+              {isExpired 
+                ? 'Seu plano de 30 dias expirou. Efetue o pagamento de um boleto para reativar todas as funcionalidades.'
+                : 'Efetue o pagamento de pelo menos um boleto mensal para ativar todas as funcionalidades do sistema.'
+              }
             </AlertDescription>
           </Alert>
 

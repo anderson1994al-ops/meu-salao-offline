@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Users, Calendar, Wrench, DollarSign } from "lucide-react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useAppData } from "@/contexts/AppDataContext";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Relatorios = () => {
-  const { clients, services, appointments } = useAppData();
+  const { clients, services, appointments, hasPendingBoletos, isExpired } = useAppData();
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
+
+  // Show blocked dialog on mount if pending boletos
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      setIsBlockedDialogOpen(true);
+    }
+  }, [hasPendingBoletos]);
   
   // Calcula faturamento por mês dinamicamente
   const monthlyData = React.useMemo(() => {
@@ -110,6 +119,13 @@ const Relatorios = () => {
           </ChartContainer>
         </Card>
       </div>
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Relatórios"
+        isExpired={isExpired}
+      />
     </Layout>
   );
 };
