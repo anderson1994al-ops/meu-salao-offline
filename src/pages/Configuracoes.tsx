@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppData } from "@/contexts/AppDataContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 const Configuracoes = () => {
   const navigate = useNavigate();
   const { exportData, importData, resetData, hasPendingBoletos } = useAppData();
+  const { signOut } = useAuth();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -48,7 +50,7 @@ const Configuracoes = () => {
     ? menuItems.filter(item => item.label === "Planos" || item.label === "Sobre")
     : menuItems;
 
-  const handleMenuClick = (label: string, route?: string) => {
+  const handleMenuClick = async (label: string, route?: string) => {
     if (route) {
       navigate(route);
     } else if (label === "Reset de Dados") {
@@ -58,6 +60,7 @@ const Configuracoes = () => {
     } else if (label === "Importar Backup") {
       fileInputRef.current?.click();
     } else if (label === "Sair da Conta") {
+      await signOut();
       navigate("/login");
     }
   };

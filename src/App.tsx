@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppDataProvider } from "@/contexts/AppDataContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Servicos from "./pages/Servicos";
@@ -20,28 +22,30 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AppDataProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/servicos" element={<Servicos />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/configuracoes" element={<Configuracoes />} />
-            <Route path="/configuracoes/notificacoes" element={<Notificacoes />} />
-            <Route path="/configuracoes/perfil" element={<Perfil />} />
-            <Route path="/configuracoes/planos" element={<Planos />} />
-            <Route path="/configuracoes/sobre" element={<Sobre />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AppDataProvider>
+    <AuthProvider>
+      <AppDataProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/servicos" element={<ProtectedRoute><Servicos /></ProtectedRoute>} />
+              <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
+              <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
+              <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
+              <Route path="/configuracoes/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+              <Route path="/configuracoes/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+              <Route path="/configuracoes/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+              <Route path="/configuracoes/sobre" element={<ProtectedRoute><Sobre /></ProtectedRoute>} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AppDataProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

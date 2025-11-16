@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,17 +6,26 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scissors, Lock, Mail, User } from "lucide-react";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import loginHero from "@/assets/login-hero.png";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { user, signIn, signUp } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,19 +36,13 @@ const Login = () => {
     }
 
     setIsLoading(true);
-
-    setTimeout(() => {
-      // Verifica credenciais admin
-      if (email === "anderson1994.al@gmail.com" && senha === "Jr85025620") {
-        toast.success("Login realizado com sucesso! Bem-vindo, Admin!");
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userEmail", email);
-        navigate("/");
-      } else {
-        toast.error("Email ou senha incorretos");
-      }
-      setIsLoading(false);
-    }, 800);
+    const { error } = await signIn(email, senha);
+    
+    if (!error) {
+      navigate("/");
+    }
+    
+    setIsLoading(false);
   };
 
   const handleCadastro = async (e: React.FormEvent) => {
@@ -61,21 +64,17 @@ const Login = () => {
     }
 
     setIsLoading(true);
-
-    setTimeout(() => {
-      // Salva o novo usuário
-      const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
-      usuarios.push({ nome, email, senha });
-      localStorage.setItem("usuarios", JSON.stringify(usuarios));
-      
-      toast.success("Cadastro realizado com sucesso! Faça login para continuar.");
+    const { error } = await signUp(email, senha, nome);
+    
+    if (!error) {
       setActiveTab("login");
       setNome("");
       setEmail("");
       setSenha("");
       setConfirmarSenha("");
-      setIsLoading(false);
-    }, 800);
+    }
+    
+    setIsLoading(false);
   };
 
   return (
