@@ -16,8 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAppData } from "@/contexts/AppDataContext";
 import BlockedAccessDialog from "@/components/BlockedAccessDialog";
+import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Clientes = () => {
+  useExpirationAlert();
   const { clients, setClients, hasPendingBoletos, isExpired } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,12 +27,12 @@ const Clientes = () => {
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", phone: "" });
 
-  // Show blocked dialog on mount if pending boletos
+  // Show blocked dialog on mount if expired or pending boletos
   useEffect(() => {
-    if (hasPendingBoletos) {
+    if (isExpired || hasPendingBoletos) {
       setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos]);
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())

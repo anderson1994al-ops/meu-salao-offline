@@ -116,6 +116,44 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useLocalStorage<Settings>("gestor_salao_settings", defaultSettings);
   const [boletos, setBoletos] = useLocalStorage<Boleto[]>("gestor_salao_boletos", defaultBoletos);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [registrationDate] = useLocalStorage<string>("gestor_salao_registration_date", new Date().toISOString());
+
+  // Initialize boletos with automatic dates based on registration date
+  useEffect(() => {
+    const initializeBoletos = () => {
+      const regDate = new Date(registrationDate);
+      const monthNames = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+      ];
+
+      const newBoletos = Array.from({ length: 5 }, (_, index) => {
+        const dueDate = new Date(regDate);
+        dueDate.setMonth(dueDate.getMonth() + index);
+        
+        const month = monthNames[dueDate.getMonth()];
+        const year = dueDate.getFullYear();
+        
+        return {
+          id: index + 1,
+          month: `${month}/${year}`,
+          dueDate: dueDate.toLocaleDateString('pt-BR'),
+          amount: 39.90,
+          status: "pendente" as const,
+        };
+      });
+
+      // Only update if boletos are default (check if dates match default)
+      const isDefault = boletos.length === 5 && 
+        boletos[0].dueDate === "05/12/2025";
+      
+      if (isDefault) {
+        setBoletos(newBoletos);
+      }
+    };
+
+    initializeBoletos();
+  }, []);
 
   // Convert date strings to Date objects when loading from localStorage
   const appointments = rawAppointments.map(apt => ({

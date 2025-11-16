@@ -15,20 +15,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppData } from "@/contexts/AppDataContext";
 import BlockedAccessDialog from "@/components/BlockedAccessDialog";
+import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Servicos = () => {
+  useExpirationAlert();
   const { services, setServices, hasPendingBoletos, isExpired } = useAppData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
 
-  // Show blocked dialog on mount if pending boletos
+  // Show blocked dialog on mount if expired or pending boletos
   useEffect(() => {
-    if (hasPendingBoletos) {
+    if (isExpired || hasPendingBoletos) {
       setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos]);
 
   const handleAddService = () => {
     if (!newService.name || !newService.duration || !newService.price) {

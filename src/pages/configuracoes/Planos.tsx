@@ -110,6 +110,37 @@ const Planos = () => {
         return boleto;
       });
       
+      // Update due dates for all pending boletos after a payment
+      const paidBoletos = updatedBoletos.filter(b => b.status === "pago" && b.paymentDate);
+      
+      if (paidBoletos.length > 0) {
+        // Get the most recent payment date
+        const mostRecentPaid = paidBoletos.reduce((latest, current) => {
+          const latestDate = new Date(latest.paymentDate!);
+          const currentDate = new Date(current.paymentDate!);
+          return currentDate > latestDate ? current : latest;
+        });
+
+        const paymentDate = new Date(mostRecentPaid.paymentDate!);
+        const monthNames = [
+          "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+          "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
+        // Update pending boletos with new dates based on payment date
+        let monthOffset = 1;
+        updatedBoletos.forEach((boleto) => {
+          if (boleto.status === "pendente") {
+            const newDueDate = new Date(paymentDate);
+            newDueDate.setMonth(newDueDate.getMonth() + monthOffset);
+            
+            boleto.dueDate = newDueDate.toLocaleDateString('pt-BR');
+            boleto.month = `${monthNames[newDueDate.getMonth()]}/${newDueDate.getFullYear()}`;
+            monthOffset++;
+          }
+        });
+      }
+      
       console.log("Boletos atualizados:", updatedBoletos);
       console.log("Boletos pagos:", updatedBoletos.filter(b => b.status === "pago"));
       

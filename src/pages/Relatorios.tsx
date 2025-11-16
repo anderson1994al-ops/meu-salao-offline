@@ -6,17 +6,19 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } fro
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useAppData } from "@/contexts/AppDataContext";
 import BlockedAccessDialog from "@/components/BlockedAccessDialog";
+import { useExpirationAlert } from "@/hooks/useExpirationAlert";
 
 const Relatorios = () => {
+  useExpirationAlert();
   const { clients, services, appointments, hasPendingBoletos, isExpired } = useAppData();
   const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
 
-  // Show blocked dialog on mount if pending boletos
+  // Show blocked dialog on mount if expired or pending boletos
   useEffect(() => {
-    if (hasPendingBoletos) {
+    if (isExpired || hasPendingBoletos) {
       setIsBlockedDialogOpen(true);
     }
-  }, [hasPendingBoletos]);
+  }, [isExpired, hasPendingBoletos]);
   
   // Calcula faturamento por mês dinamicamente
   const monthlyData = React.useMemo(() => {
