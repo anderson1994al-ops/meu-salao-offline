@@ -1,5 +1,6 @@
-import { Lock, CreditCard } from "lucide-react";
+import { Lock, CreditCard, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +19,16 @@ interface BlockedAccessDialogProps {
 
 const BlockedAccessDialog = ({ open, onOpenChange, featureName, isExpired = false }: BlockedAccessDialogProps) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const handleViewPlans = () => {
     onOpenChange(false);
     navigate("/configuracoes/planos");
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
   };
 
   return (
@@ -60,6 +67,16 @@ const BlockedAccessDialog = ({ open, onOpenChange, featureName, isExpired = fals
             size="lg"
           >
             Ver Meus Planos
+          </Button>
+
+          <Button 
+            onClick={handleSignOut}
+            variant="outline"
+            className="w-full"
+            size="lg"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair da Conta
           </Button>
         </div>
       </DialogContent>
