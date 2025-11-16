@@ -141,7 +141,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const calculatePlanStatus = () => {
     const paidBoletos = boletos.filter(b => b.status === "pago" && b.paymentDate);
     
+    console.log("Total boletos:", boletos.length);
+    console.log("Boletos pagos com data:", paidBoletos);
+    
     if (paidBoletos.length === 0) {
+      console.log("Nenhum boleto pago encontrado");
       return { daysRemaining: null, isExpired: false };
     }
 
@@ -152,6 +156,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       return currentDate > latestDate ? current : latest;
     });
 
+    console.log("Boleto mais recente:", mostRecentPaid);
+
     const paymentDate = new Date(mostRecentPaid.paymentDate!);
     const renewalDate = new Date(paymentDate);
     renewalDate.setDate(renewalDate.getDate() + 30);
@@ -159,6 +165,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const today = new Date();
     const diffTime = renewalDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    console.log("Data de pagamento:", paymentDate);
+    console.log("Data de renovação:", renewalDate);
+    console.log("Dias restantes:", diffDays);
     
     return {
       daysRemaining: diffDays > 0 ? diffDays : 0,

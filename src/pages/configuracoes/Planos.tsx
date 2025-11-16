@@ -110,6 +110,9 @@ const Planos = () => {
         return boleto;
       });
       
+      console.log("Boletos atualizados:", updatedBoletos);
+      console.log("Boletos pagos:", updatedBoletos.filter(b => b.status === "pago"));
+      
       // Check if all boletos are pending (blocks app only if ALL are pending)
       const allPending = updatedBoletos.every(b => b.status === "pendente");
       const statusMessage = !allPending 
