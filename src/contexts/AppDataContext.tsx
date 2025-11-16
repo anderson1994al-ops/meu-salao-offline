@@ -35,6 +35,7 @@ export interface Boleto {
   dueDate: string;
   amount: number;
   status: "pago" | "pendente";
+  paymentDate?: string;
 }
 
 export interface Settings {
