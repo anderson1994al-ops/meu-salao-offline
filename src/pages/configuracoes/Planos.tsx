@@ -13,25 +13,24 @@ import BottomNavigation from "@/components/BottomNavigation";
 
 const Planos = () => {
   const navigate = useNavigate();
-  const { boletos, setBoletos, hasPendingBoletos } = useAppData();
+  const { boletos, setBoletos, hasPendingBoletos, daysRemaining: contextDaysRemaining, isExpired } = useAppData();
   
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [countdown, setCountdown] = useState(30);
-  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
   const [renewalDate, setRenewalDate] = useState<string>("");
   const [showRenewalAlert, setShowRenewalAlert] = useState(false);
 
   const ADMIN_EMAIL = "anderson1994.al@gmail.com";
   const ADMIN_PASSWORD = "Jr85025620";
 
-  // Calculate days remaining for renewal
+  // Calculate renewal date and show alerts
   useEffect(() => {
     const paidBoletos = boletos.filter(b => b.status === "pago" && b.paymentDate);
     
-    if (paidBoletos.length > 0) {
+    if (paidBoletos.length > 0 && contextDaysRemaining !== null) {
       // Get the most recent paid boleto
       const mostRecentPaid = paidBoletos.reduce((latest, current) => {
         const latestDate = new Date(latest.paymentDate!);
@@ -43,25 +42,27 @@ const Planos = () => {
       const renewalDate = new Date(paymentDate);
       renewalDate.setDate(renewalDate.getDate() + 30);
       
-      const today = new Date();
-      const diffTime = renewalDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      setDaysRemaining(diffDays > 0 ? diffDays : 0);
       setRenewalDate(renewalDate.toLocaleDateString('pt-BR'));
       
-      // Show alert if 2 days or less remaining
-      if (diffDays <= 2 && diffDays > 0 && !showRenewalAlert) {
+      // Show alert if 2 days or less remaining and not already shown
+      if (contextDaysRemaining <= 2 && contextDaysRemaining > 0 && !showRenewalAlert) {
         setShowRenewalAlert(true);
         toast.warning(
           `Sua mensalidade vencerá dia ${renewalDate.toLocaleDateString('pt-BR')}. Não fique sem os recursos dos planos premium do nosso app!`,
           { duration: 10000 }
         );
       }
-    } else {
-      setDaysRemaining(null);
+
+      // Show expiration alert if expired
+      if (isExpired && !showRenewalAlert) {
+        setShowRenewalAlert(true);
+        toast.error(
+          `Seu plano expirou! Pague um boleto para continuar usando todas as funcionalidades.`,
+          { duration: 10000 }
+        );
+      }
     }
-  }, [boletos]);
+  }, [boletos, contextDaysRemaining, isExpired]);
 
   // Countdown timer
   useEffect(() => {
@@ -131,14 +132,16 @@ const Planos = () => {
           </button>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold">PLANOS</h1>
-            {daysRemaining !== null && (
+            {contextDaysRemaining !== null && (
               <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                daysRemaining <= 2 
+                isExpired
+                  ? 'bg-destructive text-destructive-foreground animate-pulse' 
+                  : contextDaysRemaining <= 2 
                   ? 'bg-destructive/20 text-destructive' 
                   : 'bg-primary-foreground/20'
               }`}>
                 <Calendar className="w-4 h-4" />
-                <span>{daysRemaining} dias</span>
+                <span>{isExpired ? 'EXPIRADO' : `${contextDaysRemaining} dias`}</span>
               </div>
             )}
           </div>
@@ -152,8 +155,23 @@ const Planos = () => {
       </header>
 
       <div className="p-4 space-y-4 pb-20">
+        {/* Expiration Alert */}
+        {isExpired && (
+          <Card className="p-4 bg-destructive border-destructive animate-pulse">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive-foreground flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-destructive-foreground mb-1">Plano Expirado!</h3>
+                <p className="text-sm text-destructive-foreground">
+                  Seu plano expirou. Pague um boleto imediatamente para continuar usando todas as funcionalidades do app!
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Renewal Alert */}
-        {daysRemaining !== null && daysRemaining <= 2 && (
+        {!isExpired && contextDaysRemaining !== null && contextDaysRemaining <= 2 && (
           <Card className="p-4 bg-destructive/10 border-destructive">
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
@@ -172,13 +190,18 @@ const Planos = () => {
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-foreground">Plano Profissional</h2>
             <Badge className={hasPendingBoletos ? "bg-destructive hover:bg-destructive/90 text-white" : "bg-green-500 hover:bg-green-600 text-white"}>
-              {hasPendingBoletos ? "Pendente" : "Ativo"}
+              {hasPendingBoletos ? (isExpired ? "Expirado" : "Pendente") : "Ativo"}
             </Badge>
           </div>
           <p className="text-2xl font-bold text-primary">R$ 39,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
-          {daysRemaining !== null && (
+          {contextDaysRemaining !== null && !isExpired && (
             <p className="text-sm text-muted-foreground mt-2">
-              Renovação em {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'} ({renewalDate})
+              Renovação em {contextDaysRemaining} {contextDaysRemaining === 1 ? 'dia' : 'dias'} ({renewalDate})
+            </p>
+          )}
+          {isExpired && (
+            <p className="text-sm text-destructive font-semibold mt-2">
+              ⚠️ Plano expirado! Pague para reativar.
             </p>
           )}
         </Card>

@@ -60,6 +60,8 @@ interface AppDataContextType {
   boletos: Boleto[];
   setBoletos: (boletos: Boleto[] | ((prev: Boleto[]) => Boleto[])) => void;
   hasPendingBoletos: boolean;
+  daysRemaining: number | null;
+  isExpired: boolean;
   exportData: () => void;
   importData: (data: string) => void;
   resetData: () => void;
@@ -135,7 +137,39 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const hasPendingBoletos = boletos.every(boleto => boleto.status === "pendente");
+  // Calculate days remaining and expiration status
+  const calculatePlanStatus = () => {
+    const paidBoletos = boletos.filter(b => b.status === "pago" && b.paymentDate);
+    
+    if (paidBoletos.length === 0) {
+      return { daysRemaining: null, isExpired: false };
+    }
+
+    // Get the most recent paid boleto
+    const mostRecentPaid = paidBoletos.reduce((latest, current) => {
+      const latestDate = new Date(latest.paymentDate!);
+      const currentDate = new Date(current.paymentDate!);
+      return currentDate > latestDate ? current : latest;
+    });
+
+    const paymentDate = new Date(mostRecentPaid.paymentDate!);
+    const renewalDate = new Date(paymentDate);
+    renewalDate.setDate(renewalDate.getDate() + 30);
+    
+    const today = new Date();
+    const diffTime = renewalDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return {
+      daysRemaining: diffDays > 0 ? diffDays : 0,
+      isExpired: diffDays <= 0
+    };
+  };
+
+  const { daysRemaining, isExpired } = calculatePlanStatus();
+
+  // Check if app should be blocked: all boletos pending OR plan expired
+  const hasPendingBoletos = boletos.every(boleto => boleto.status === "pendente") || isExpired;
 
   // Auto-save notification (skip on initial load)
   useEffect(() => {
@@ -208,6 +242,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         boletos,
         setBoletos,
         hasPendingBoletos,
+        daysRemaining,
+        isExpired,
         exportData,
         importData,
         resetData,

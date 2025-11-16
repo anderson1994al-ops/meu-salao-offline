@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -14,12 +14,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppData } from "@/contexts/AppDataContext";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Servicos = () => {
-  const { services, setServices } = useAppData();
+  const { services, setServices, hasPendingBoletos, isExpired } = useAppData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
+
+  // Show blocked dialog on mount if pending boletos
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      setIsBlockedDialogOpen(true);
+    }
+  }, [hasPendingBoletos]);
 
   const handleAddService = () => {
     if (!newService.name || !newService.duration || !newService.price) {
@@ -113,6 +122,13 @@ const Servicos = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Serviços"
+        isExpired={isExpired}
+      />
     </Layout>
   );
 };

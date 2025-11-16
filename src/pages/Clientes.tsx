@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -15,13 +15,22 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAppData } from "@/contexts/AppDataContext";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Clientes = () => {
-  const { clients, setClients } = useAppData();
+  const { clients, setClients, hasPendingBoletos, isExpired } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", phone: "" });
+
+  // Show blocked dialog on mount if pending boletos
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      setIsBlockedDialogOpen(true);
+    }
+  }, [hasPendingBoletos]);
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -121,6 +130,13 @@ const Clientes = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Clientes"
+        isExpired={isExpired}
+      />
     </Layout>
   );
 };

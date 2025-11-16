@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Card } from "@/components/ui/card";
@@ -25,12 +25,14 @@ import {
 import { ptBR } from "date-fns/locale";
 import { useAppData } from "@/contexts/AppDataContext";
 import { addMonths, subMonths } from "date-fns";
+import BlockedAccessDialog from "@/components/BlockedAccessDialog";
 
 const Index = () => {
-  const { appointments, setAppointments, services, settings } = useAppData();
+  const { appointments, setAppointments, services, settings, hasPendingBoletos, isExpired } = useAppData();
   const [date, setDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("agenda");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newAppointment, setNewAppointment] = useState({
@@ -38,6 +40,13 @@ const Index = () => {
     service: "",
     time: "",
   });
+
+  // Show blocked dialog on mount if pending boletos
+  useEffect(() => {
+    if (hasPendingBoletos) {
+      setIsBlockedDialogOpen(true);
+    }
+  }, [hasPendingBoletos]);
 
   const selectedDateAppointments = appointments.filter(
     (apt) => apt.date.toDateString() === date.toDateString()
@@ -446,6 +455,13 @@ Obrigada! Te Aguardamos Ansiosamente! 🌸💄`;
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BlockedAccessDialog 
+        open={isBlockedDialogOpen}
+        onOpenChange={setIsBlockedDialogOpen}
+        featureName="Agenda"
+        isExpired={isExpired}
+      />
     </Layout>
   );
 };
