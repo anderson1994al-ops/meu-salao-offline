@@ -132,18 +132,25 @@ const Planos = () => {
           </button>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold">PLANOS</h1>
-            {contextDaysRemaining !== null && (
-              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                isExpired
-                  ? 'bg-destructive text-destructive-foreground animate-pulse' 
-                  : contextDaysRemaining <= 2 
-                  ? 'bg-destructive/20 text-destructive' 
-                  : 'bg-primary-foreground/20'
-              }`}>
-                <Calendar className="w-4 h-4" />
-                <span>{isExpired ? 'EXPIRADO' : `${contextDaysRemaining} dias`}</span>
-              </div>
-            )}
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+              isExpired
+                ? 'bg-destructive text-destructive-foreground animate-pulse' 
+                : contextDaysRemaining !== null && contextDaysRemaining <= 2 
+                ? 'bg-destructive/20 text-destructive' 
+                : contextDaysRemaining !== null
+                ? 'bg-primary-foreground/20'
+                : 'bg-muted/50 text-muted-foreground'
+            }`}>
+              <Calendar className="w-4 h-4" />
+              <span>
+                {isExpired 
+                  ? 'EXPIRADO' 
+                  : contextDaysRemaining !== null 
+                  ? `${contextDaysRemaining} dias` 
+                  : 'Pendente'
+                }
+              </span>
+            </div>
           </div>
         </div>
         {isAuthenticated && (
