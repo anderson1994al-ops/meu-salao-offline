@@ -27,8 +27,17 @@ const BlockedAccessDialog = ({ open, onOpenChange, featureName, isExpired = fals
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/login");
+    onOpenChange(false);
+    try {
+      await signOut();
+      // Force navigation after signOut completes
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 100);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      navigate("/login", { replace: true });
+    }
   };
 
   return (

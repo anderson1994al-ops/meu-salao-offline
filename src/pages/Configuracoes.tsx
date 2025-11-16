@@ -60,8 +60,13 @@ const Configuracoes = () => {
     } else if (label === "Importar Backup") {
       fileInputRef.current?.click();
     } else if (label === "Sair da Conta") {
-      await signOut();
-      navigate("/login");
+      try {
+        await signOut();
+        navigate("/login", { replace: true });
+      } catch (error) {
+        console.error("Error signing out:", error);
+        navigate("/login", { replace: true });
+      }
     }
   };
 
