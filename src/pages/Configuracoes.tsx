@@ -47,7 +47,7 @@ const Configuracoes = () => {
 
   // Filter menu items based on payment status
   const filteredMenuItems = hasPendingBoletos 
-    ? menuItems.filter(item => item.label === "Planos" || item.label === "Sobre")
+    ? menuItems.filter(item => item.label === "Planos" || item.label === "Sobre" || item.label === "Sair da Conta")
     : menuItems;
 
   const handleMenuClick = async (label: string, route?: string) => {
